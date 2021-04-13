@@ -13,8 +13,7 @@ const categorySchema = new mongoose.Schema({
         maxLength : 255
     },
     image : {
-        data : Buffer,
-        contentType : String
+        type : String
     }
 },{timestamp : true})
 module.exports = mongoose.model ("Category",categorySchema);

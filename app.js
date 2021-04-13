@@ -4,14 +4,19 @@ import dotenv from 'dotenv';
 import productsRouter from './routes/products';
 import categoryRouter from './routes/category';
 import blogRouter from './routes/blog';
-import authRouter from './routes/auth';
+import commentRouter from './routes/comment';
+import contactRouter from './routes/contact';
+import orderRouter from './routes/order';
+import orderDetailRouter from './routes/orderDetail';
+const authRouter = require('./routes/auth');
+import userRouter from './routes/user';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import expressValidator from 'express-validator';
 const app = express();
 dotenv.config();
-app.use(bodyParser.json())
-app.use(cors())
+
 //connection
 mongoose.connect(process.env.MONGODB_URI,{
   useNewUrlParser : true,
@@ -23,15 +28,23 @@ mongoose.connection.on('error',(err)=>{
   console.log('lôi');
 })
 
+// middleware 
+app.use(bodyParser.json());
 app.use(morgan('dev'));
-//routes
+app.use(expressValidator());
+app.use(cors());
+
+
+//routes middleware
 app.use('/api',productsRouter);
 app.use('/api',categoryRouter);
 app.use('/api',blogRouter);
 app.use('/api',authRouter);
-
-
-
+app.use('/api',userRouter);
+app.use('/api',commentRouter);
+app.use('/api',contactRouter);
+app.use('/api',orderRouter);
+app.use('/api',orderDetailRouter);
 const port = process.env.PORT || 8000
 
 

@@ -6,43 +6,32 @@ import _ from 'lodash'
 export const Create = (req,res) => {
     let form = formidable.IncomingForm();
     form.keepExtenstions = true;
-    form.parse(req, (err,fields,files) => {
+    form.parse(req, (err,fields) => {
         if(err){
-            return res.json.status(400)({
+            return res.status(400).json({
                 error : "404 k thể thêm danh mục1"
             })
         }
         //  kiểm tra dữ liệu có được nhập hay k
-        const { name , description  } = fields ;
-        if(!name || !description){
-            return res.json.status(400)({
+        const { name , description ,image } = fields ;
+        if(!name || !description || !image){
+            return res.status(400).json({
                 error : " không được để trống !"
             })
         }
 
         let category = new Category(fields);
 
-        if(files.image){
-            if(files.image.size < 0){
-                res.status(400).json({
-                    error : "ảnh quá nhỏ k thể upload"
-                })
-            }
-        }
-
-        category.image.data = fs.readFileSync(files.image.path);
-        category.image.contentType = files.image.type;
-
         category.save((err,data)=>{
             if(err){
                 res.status(400).json({
                     error : "Thêm danh mục không thành công 😂"
                 })
-            }
+            }   
             res.json(data);
         })
     
-    })
+    }) 
 
 
 }
@@ -54,15 +43,15 @@ export const Read = (req,res) =>{
 export const Update = (req,res) =>{
   let form = formidable.IncomingForm();
   form.keepExtenstions = true;
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, (err, fields) => {
     if (err) {
       return res.status(400).json({
         error: "400 error update category"
       })
     }
     //kiem tra du lieu co duoc nhap hay k
-    const { name, description } = fields;
-    if (!name  || !description) {
+    const { name, description,image } = fields;
+    if (!name  || !description || !image) {
       return res.status(400).json({
         error: "ban can dien day du thong tin"
       })
@@ -70,16 +59,7 @@ export const Update = (req,res) =>{
     // let category = new category(fields);
     let category = req.category;
     category = _.assignIn(category,fields);
-    if (files.image) {
-      if (files.image.size < 0) {
-        res.status(400).json({
-          error: " ban nen up anh < 1MB"
-        })
-      }
-      category.image.data = fs.readFileSync(files.image.path);
-      category.image.contentType = files.image.type;
 
-    }
     category.save((err, data) => {
       if (err) {
         res.status(400).json({
@@ -125,7 +105,7 @@ export const List = (req,res)=>{
   Category.find((err,data)=>{
       if(err){
           return res.status(400).json({
-            error : "k xoa duoc category"
+            error : "k list category"
           })
         }
         res.json(data);

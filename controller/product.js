@@ -6,30 +6,30 @@ export const Create = (req, res) => {
 
   let form = formidable.IncomingForm();
   form.keepExtenstions = true;
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, (err, field) => {
     if (err) {
       return res.status(400).json({
         error: "400 error add product"
       })
     }
     //kiem tra du lieu co duoc nhap hay k
-    const { name, description, price ,cate_id} = fields;
-    if (!name || !price || !description) {
+    const { name, description, price ,cate_id,image} = fields;
+    if (!name || !price || !description ||!image) {
       return res.status(400).json({
         error: "ban can dien day du thong tin"
       })
     }
     let product = new Product(fields);
-    if (files.image) {
-      if (files.image.size < 0) {
-        res.status(400).json({
-          error: " ban nen up anh < 1MB"
-        })
-      }
-      product.image.data = fs.readFileSync(files.image.path);
-      product.image.contentType = files.image.type;
+    // if (files.image) {
+    //   if (files.image.size < 0) {
+    //     res.status(400).json({
+    //       error: " ban nen up anh < 1MB"
+    //     })
+    //   }
+    //   product.image.data = fs.readFileSync(files.image.path);
+    //   product.image.contentType = files.image.type;
 
-    }
+    // }
     product.save((err, data) => {
       if (err) {
         res.status(400).json({
@@ -51,7 +51,7 @@ export const Read = (req, res) => {
 export const Update = (req,res) =>{
   let form = formidable.IncomingForm();
   form.keepExtenstions = true;
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, (err, fields) => {
     if (err) {
       return res.status(400).json({
         error: "400 error update product"
@@ -67,16 +67,16 @@ export const Update = (req,res) =>{
     // let product = new Product(fields);
     let product = req.product;
     product = _.assignIn(product,fields);
-    if (files.image) {
-      if (files.image.size < 0) {
-        res.status(400).json({
-          error: " ban nen up anh < 1MB"
-        })
-      }
-      product.image.data = fs.readFileSync(files.image.path);
-      product.image.contentType = files.image.type;
+    // if (files.image) {
+    //   if (files.image.size < 0) {
+    //     res.status(400).json({
+    //       error: " ban nen up anh < 1MB"
+    //     })
+    //   }
+    //   product.image.data = fs.readFileSync(files.image.path);
+    //   product.image.contentType = files.image.type;
 
-    }
+    // }
     product.save((err, data) => {
       if (err) {
         res.status(400).json({

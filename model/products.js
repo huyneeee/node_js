@@ -22,8 +22,7 @@ const productSchema = new mongoose.Schema({
         type : Number
     },
     image : {
-        data : Buffer,
-        contentType : String
+       type: String
     },
     status : {
         type : Boolean,

@@ -14,6 +14,7 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import expressValidator from 'express-validator';
+import cookieParser from 'cookie-parser';
 const app = express();
 dotenv.config();
 
@@ -33,7 +34,7 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 app.use(expressValidator());
 app.use(cors());
-
+app.use(cookieParser());
 
 //routes middleware
 app.use('/api',productsRouter);

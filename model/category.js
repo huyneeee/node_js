@@ -15,5 +15,5 @@ const categorySchema = new mongoose.Schema({
     image : {
         type : String
     }
-},{timestamp : true})
+},{timestamps : true})
 module.exports = mongoose.model ("Category",categorySchema);

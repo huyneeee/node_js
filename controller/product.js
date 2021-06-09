@@ -2,34 +2,23 @@ import Product from '../model/products'
 import formidable from 'formidable'
 import fs from 'fs'
 import _ from 'lodash'
+import mongoose from 'mongoose'
+const { ObjectId } =  mongoose.Schema;
+export const ProductById = (req, res, next, id) => {
+
+  Product.findById(id).exec((err, product) => {
+    if (err || !product) {
+      return res.status(400).json({
+        error: "k tim thay san pham"
+      })
+    }
+    req.product = product;
+    next();
+  })
+}
 export const Create = (req, res) => {
 
-  let form = formidable.IncomingForm();
-  form.keepExtenstions = true;
-  form.parse(req, (err, field) => {
-    if (err) {
-      return res.status(400).json({
-        error: "400 error add product"
-      })
-    }
-    //kiem tra du lieu co duoc nhap hay k
-    const { name, description, price ,cate_id,image} = fields;
-    if (!name || !price || !description ||!image) {
-      return res.status(400).json({
-        error: "ban can dien day du thong tin"
-      })
-    }
-    let product = new Product(fields);
-    // if (files.image) {
-    //   if (files.image.size < 0) {
-    //     res.status(400).json({
-    //       error: " ban nen up anh < 1MB"
-    //     })
-    //   }
-    //   product.image.data = fs.readFileSync(files.image.path);
-    //   product.image.contentType = files.image.type;
-
-    // }
+    const product = new Product(req.body);
     product.save((err, data) => {
       if (err) {
         res.status(400).json({
@@ -39,7 +28,6 @@ export const Create = (req, res) => {
       res.json(data);
     })
 
-  })
 }
 
 export const Read = (req, res) => {
@@ -49,46 +37,21 @@ export const Read = (req, res) => {
 
 
 export const Update = (req,res) =>{
-  let form = formidable.IncomingForm();
-  form.keepExtenstions = true;
-  form.parse(req, (err, fields) => {
-    if (err) {
-      return res.status(400).json({
-        error: "400 error update product"
-      })
-    }
-    //kiem tra du lieu co duoc nhap hay k
-    const { name, description, price } = fields;
-    if (!name || !price || !description) {
-      return res.status(400).json({
-        error: "ban can dien day du thong tin"
-      })
-    }
-    // let product = new Product(fields);
-    let product = req.product;
-    product = _.assignIn(product,fields);
-    // if (files.image) {
-    //   if (files.image.size < 0) {
-    //     res.status(400).json({
-    //       error: " ban nen up anh < 1MB"
-    //     })
-    //   }
-    //   product.image.data = fs.readFileSync(files.image.path);
-    //   product.image.contentType = files.image.type;
-
-    // }
-    product.save((err, data) => {
-      if (err) {
+  Product.findOneAndUpdate(
+    { _id  : req.product._id },
+    { $set : req.body},
+    {new : true },(err,product)=>{
+      if(err){
         res.status(400).json({
-          error: "update san pham  k thanh cong"
+          error : "Không thể update được product"
         })
       }
-      res.json(data);
-    })
+      res.json(product);
+    }
+  )
 
-  })
 }
-
+ 
 export const Delete = (req,res) =>{
   let product = req.product;
   product.remove((err,deleteProduct)=>{
@@ -106,6 +69,7 @@ export const Delete = (req,res) =>{
 } 
 
 export const List = (req, res) => {
+  console.log(req.cookies);
   Product.find()
         // .select("image")
         .exec((err, data) => {
@@ -118,23 +82,73 @@ export const List = (req, res) => {
         })
 }
 
-export const ProductById = (req, res, next, id) => {
 
-  Product.findById(id).exec((err, product) => {
-    if (err || !product) {
-      return res.status(400).json({
-        error: "k tim thay san pham"
+export const ProductByCateId = (req,res,next,cate_id)=>{
+
+    Product.find({cate_id:cate_id}).exec((err,product)=>{
+
+        if(err){
+          res.status(400).json({
+            error : "k thay san pham theo cate"
+          })
+        }
+        req.product = product;
+        next();
+      })
+}
+
+export const ProductByTextSearch = (req,res,next,textSearch)=>{
+Product.find({"name": {$regex:textSearch,$options:'i'}}).exec((err,product)=>{
+
+      if(err){
+        res.status(400).json({
+          error : "product not found for text search"
+        })
+      }
+      req.product = product;
+      next();
+    })
+}
+export const ProductByPrice = (req,res)=>{
+  let gte = req.query.gte;
+  let lte = req.query.lte;
+  Product.find({price:{$gte:gte,$lte:lte}}).exec((err,product)=>{
+    if(err){
+      res.status(400).json({
+        error : "Product not found for price"
       })
     }
-    req.product = product;
-    next();
+    req.product=product;
+    res.json(req.product);
   })
 }
-// router.get("/product/photo/:productId", photo)
-// export const image = (req,res) =>{
-//   if(req.product.image.data){
-//     res.set("Content-Type",req.product.image.content-type);
-//     return res.send(req.product.image.data);
-//   }
-//   next();
-// }
+
+export const ProductPagination = (req,res)=>{
+  let page = req.query.page;
+  let perPage = 6;
+ 
+  Product.find({})
+    .skip((perPage*page)-perPage) // Trong page đầu tiên sẽ bỏ qua giá trị là 0
+    .limit(perPage)
+    .exec((err,product)=>{
+      if(err){
+        res.status(400).json({
+          error:"product not found page"
+        })
+      }
+      // req.product=product;
+      return res.json(product);
+    })
+    
+}
+export const countProduct = (req,res)=>{
+  Product.count({}).exec((err,count)=>{
+    if(err){
+      return res.status(400).json({
+        error : "k count duoc product"
+      })
+    }
+    // req.product = count;
+    return res.json(count);
+  })
+}

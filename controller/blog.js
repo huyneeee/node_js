@@ -3,35 +3,21 @@ import formidable from 'formidable'
 import fs from 'fs'
 import _ from 'lodash'
 
+export const blogId = ( req,res,next,id) =>{
+  Blog.findById(id).exec((err,blog) =>{
+      if(err){
+          return res.status(400).json({
+              error : " k tìm thấy sản phẩm"
+          })
+      }
+      req.blog = blog ;
+      next();
+  })
+}
+
 export const Create = (req,res) => {
-    let form = formidable.IncomingForm();
-    form.keepExtenstions = true;
-    form.parse(req, (err,fields,files) => {
-        if(err){
-            return res.json.status(400)({
-                error : "404 k thể thêm danh mục1"
-            })
-        }
-        //  kiểm tra dữ liệu có được nhập hay k
-        const { name , content  } = fields ;
-        if(!name || !content ){
-            return res.json.status(400)({
-                error : " không được để trống !"
-            })
-        }
-
-        let blog = new Blog(fields);
-
-        if(files.image){
-            if(files.image.size < 0){
-                res.status(400).json({
-                    error : "ảnh quá nhỏ k thể upload"
-                })
-            }
-        }
-
-        blog.image.data = fs.readFileSync(files.image.path);
-        blog.image.contentType = files.image.type;
+   
+        let blog = new Blog(req.body);
 
         blog.save((err,data)=>{
             if(err){
@@ -41,10 +27,6 @@ export const Create = (req,res) => {
             }
             res.json(data);
         })
-    
-    })
-
-
 }
 
 export const Read = (req,res) =>{
@@ -52,44 +34,18 @@ export const Read = (req,res) =>{
 }
 
 export const Update = (req,res) =>{
-    let form = formidable.IncomingForm();
-    form.keepExtenstions = true;
-    form.parse(req, (err, fields, files) => {
-      if (err) {
-        return res.status(400).json({
-          error: "400 error update blog"
+  Blog.findOneAndUpdate(
+    { _id  : req.blog._id },
+    { $set : req.body},
+    {new : true },(err,blog)=>{
+      if(err){
+        res.status(400).json({
+          error : "Không thể update được blog"
         })
       }
-      //kiem tra du lieu co duoc nhap hay k
-      const { name, content } = fields;
-      if (!name  || !content) {
-        return res.status(400).json({
-          error: "ban can dien day du thong tin"
-        })
-      }
-      // let blog = new blog(fields);
-      let blog = req.blog;
-      blog = _.assignIn(blog,fields);
-      if (files.image) {
-        if (files.image.size < 0) {
-          res.status(400).json({
-            error: " ban nen up anh < 1MB"
-          })
-        }
-        blog.image.data = fs.readFileSync(files.image.path);
-        blog.image.contentType = files.image.type;
-  
-      }
-      blog.save((err, data) => {
-        if (err) {
-          res.status(400).json({
-            error: "update san pham  k thanh cong"
-          })
-        }
-        res.json(data);
-      })
-  
-    })
+      res.json(blog);
+    }
+  )
 }
 
 export const Delete = (req,res) =>{
@@ -120,17 +76,7 @@ export const List = (req,res)=>{
     })
 }
 
-export const blogId = ( req,res,next,id) =>{
-    Blog.findById(id).exec((err,blog) =>{
-        if(err){
-            return res.status(400).json({
-                error : " k tìm thấy sản phẩm"
-            })
-        }
-        req.blog = blog ;
-        next();
-    })
-}
+
 
 
 

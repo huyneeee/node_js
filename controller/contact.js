@@ -1,25 +1,9 @@
 import Contact from  '../model/contact'
-import formidable from 'formidable'
 import _ from 'lodash'
 
 export const Create = (req,res) =>{
-    let form = formidable.IncomingForm();
-    form.keepExtenstions = true;
-    form.parse(req, (err,fields) => {
-        if(err){
-            return res.json.status(400)({
-                error : "k thêm được contact"
-            })
-        }
-        //  kiểm tra dữ liệu có được nhập hay k
-        const { name , email,phone,massage  } = fields ;
-        if(!name || !email || !phone || !massage ){
-            return res.json.status(400)({
-                error : " không được để trống !"
-            })
-        }
-
-        let contact = new Contact(fields);
+ 
+        let contact = new Contact(req.body);
 
         contact.save((err,data)=>{
             if(err){
@@ -29,8 +13,6 @@ export const Create = (req,res) =>{
             }
             res.json(data);
         })
-    
-    })
 
 }
 export const contactId = (req,res,next,id)=>{

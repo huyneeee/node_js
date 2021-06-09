@@ -13,7 +13,7 @@ export const signup = (req, res) => {
         }
         user.salt = undefined
         user.hashed_password = undefined
-        res.json({ user })
+        res.json({user})
     })
 }
 export const signin = (req, res) => {
@@ -24,6 +24,7 @@ export const signin = (req, res) => {
     User.findOne({ email }, (err, user) => {
         if (err || !user) {
             return res.status(400).json({
+                email:"email",
                 error: "User with that email does not exist . Please signup!"
             })
         }
@@ -31,7 +32,8 @@ export const signin = (req, res) => {
         //if user is found make sure email and passowrd hash
         //creat authenticate method in user model
         if (!user.authenticate(password)) {
-            return res.status(200).json({
+            return res.status(400).json({
+                password:"password",
                 error: "Email and password not match"
             })
         }
@@ -41,12 +43,25 @@ export const signin = (req, res) => {
         // persist the token as 't' in cookie with
         res.cookie('userSignIn', token, { expire: new Date() + 9999 });
         //return res with user and token to fronend client
-        const { _id , name , email , role} = user;
+        const { _id , name , email , role,avatar} = user;
         return res.json({
-            token,user : { _id,name,email,role}
+            token,user : { _id,name,email,role,avatar}
         })
     })    
 
+}
+export const checkPassword = (req,res)=>{
+    let user = req.profile; 
+    let id = user._id;
+    const { password } = req.body;
+    User.findOne({_id:id}, (err, user) => {
+        if (!user.authenticate(password)) {
+            return res.status(400).json({
+                error: "Password not match !"
+            })
+        }
+        res.json({password})
+    })
 }
 export const requireSignin = expressJwt({
     secret: process.env.JWT_SECRET,
@@ -54,24 +69,28 @@ export const requireSignin = expressJwt({
     userProperty: "auth",
 })
 export const signout = (req,res)=>{
+
     res.clearCookie('userSignIn');
-    res.json({
+    res.json({ 
         message : "SignOut "
     })
 }
 export const isAdmin = (req,res,next)=>{
+
     if(req.profile.role == 0){
         return res.status(403).json({
-            error : "Admin resource! Access Denined"
+            error : "Bạn không phải là Admin !"
         })
     }
     next();
 }
 export const isAuth = (req,res,next)=>{
+    // console.log(req.auth);
+
     let user = req.profile && req.auth && req.profile._id == req.auth._id;
-    if(!user){
+    if(!user){ 
         return res.status(403).json({
-            error : "access denied"
+            error : "Bạn không phải là nhân viên !"
         })
     }
     next();

@@ -27,10 +27,6 @@ const orderDetailSchema = new mongoose.Schema({
         ref : "Category",
         required : true
     },
-    status : {
-        type : Boolean,
-        required : true  
-    },
     sl : {
         type : Number,
         trim : true,
@@ -43,5 +39,5 @@ const orderDetailSchema = new mongoose.Schema({
         required : true
     }
 
-},{timestamp : true})
+},{timestamps : true})
 module.exports = mongoose.model ("OrderDetail",orderDetailSchema);

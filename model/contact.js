@@ -21,5 +21,5 @@ const contactSchema = new mongoose.Schema({
         trim : true,
         maxLength : 500
     }
-},{timestamp : true})
+},{timestamps : true})
 module.exports = mongoose.model ("Contact",contactSchema);

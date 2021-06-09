@@ -13,8 +13,7 @@ const blogSchema = new mongoose.Schema({
         maxLength : 2000
     },
     image : {
-        data : Buffer,
-        contentType : String
+        type:String
     }
-},{timestamp : true})
-module.exports = mongoose.model ("Blog",blogSchema);
+},{timestamps : true})
+module.exports = mongoose.model ("Blog",blogSchema); 

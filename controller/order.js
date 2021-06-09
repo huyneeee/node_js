@@ -2,24 +2,8 @@ import Order from '../model/order'
 import formidable from 'formidable'
 import _ from 'lodash';
 export const Create = (req,res)=>{
-    let form = formidable.IncomingForm();
-    form.keepExtenstions = true;
-    form.parse(req, (err,fields) => {
-        if(err){
-            return res.json.status(400)({
-                error : "k thêm được order"
-            })
-        }
-        //  kiểm tra dữ liệu có được nhập hay k
-        const { id_order_maker,name_of_consignee,address,phone,subtotal} = fields ;
-        if(!id_order_maker || !name_of_consignee || !address || !phone || !subtotal ){
-            return res.json.status(400)({
-                error : " không được để trống !"
-            })
-        }
-
-        let order = new Order(fields);
-
+   
+        let order = new Order(req.body);
         order.save((err,data)=>{
             if(err){
                 res.status(400).json({
@@ -28,8 +12,6 @@ export const Create = (req,res)=>{
             }
             res.json(data);
         })
-    
-    })
 }
 export const orderId = (req,res,next,id)=>{
     Order.findById(id).exec((err,order)=>{
